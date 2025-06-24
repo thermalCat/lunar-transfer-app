@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from simulate_transfer import simulate_transfer
+import simulate_earth_moon_transfer as sim
 
 st.set_page_config(layout="wide")
 st.title("🌕 Earth-to-Moon Transfer Simulator")
@@ -23,7 +23,7 @@ if run:
     v0 = np.array([vx0_kms * 1e3, vy0_kms * 1e3])
     st.write("Simulating...")
 
-    result = simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=animate)
+    result = sim.simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=animate)
 
     if result["outcome"] == "collision":
         st.error(f"☄️ Collision with {result['body']} at t = {result['time']:.1f} seconds.")
