@@ -106,7 +106,7 @@ def animate_trajectory(trajectory, t_vals, filename="animation.mp4"):
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.set_xlim(np.min(trajectory[:,0]) / 1e3 - 5000, np.max(trajectory[:,0]) / 1e3 + 5000)
     ax.set_ylim(np.min(trajectory[:,1]) / 1e3 - 5000, np.max(trajectory[:,1]) / 1e3 + 5000)
-    ax.set_xlabel("X (km)")Solution to animation not working on Streamlit: export simulation plot as mp4, and playback via IO.
+    ax.set_xlabel("X (km)")
     ax.set_ylabel("Y (km)")
     ax.set_title("Earth-Moon Transfer")
     ax.grid()
