@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-import simulate_earth_moon_transfer as sim
+from simulate_earth_moon_transfer import simulate_transfer  
 
 st.set_page_config(layout="wide")
 st.title("🌕 Earth-to-Moon Transfer Simulator")
@@ -23,10 +23,20 @@ if run:
     v0 = np.array([vx0_kms * 1e3, vy0_kms * 1e3])
     st.write("Simulating...")
 
-    result = sim.simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=animate)
+    result = simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=False)
 
     if result["outcome"] == "collision":
         st.error(f"☄️ Collision with {result['body']} at t = {result['time']:.1f} seconds.")
     else:
         st.success(f"✅ No collision. Nearest approach to Moon: {result['nearest_approach_km']:.1f} km")
         st.write(f"Closest point (km): {result['closest_point_km']}")
+    
+    if animate:
+        # Generate and render animation
+        from simulate_earth_moon_transfer import animate_trajectory
+        from io import BytesIO
+        buffer = BytesIO()
+        animate_trajectory(result["trajectory"], result["t_vals"], filename=buffer)
+
+        buffer.seek(0)
+        st.video(buffer.read())
