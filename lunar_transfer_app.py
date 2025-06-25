@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from simulate_transfer import simulate_transfer
+from simulate_earth_moon_transfer import simulate_transfer
 
 st.set_page_config(layout="wide")
 st.title("🌕 Earth-to-Moon Transfer Simulator")
