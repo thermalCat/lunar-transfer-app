@@ -119,14 +119,22 @@ def animate_trajectory(trajectory, t_vals, filename="animation.gif"):
         return sc_line, sc_dot, earth_dot, moon_dot
 
     def update(frame):
-        sc_line.set_data(trajectory[:frame+1, 0]/1e3, trajectory[:frame+1, 1]/1e3)
-        sc_dot.set_data(trajectory[frame, 0]/1e3, trajectory[frame, 1]/1e3)
+        frame = min(frame, len(t_vals) - 1)  # Prevent out-of-range index
+
+        x = trajectory[:frame+1, 0] / 1e3
+        y = trajectory[:frame+1, 1] / 1e3
+        sc_line.set_data(x, y)
+        sc_dot.set_data(x[-1], y[-1])
+
         earth = earth_position(t_vals[frame]) / 1e3
         moon = moon_position(t_vals[frame]) / 1e3
         earth_dot.set_data(*earth)
         moon_dot.set_data(*moon)
+
         return sc_line, sc_dot, earth_dot, moon_dot
 
+
+    print(f"Animating {len(t_vals)} frames")
     ani = animation.FuncAnimation(fig, update, frames=len(t_vals),
                                   init_func=init, blit=True, interval=30)
     ani.save(str(filename), writer='pillow')  # Save as GIF instead of MP4
