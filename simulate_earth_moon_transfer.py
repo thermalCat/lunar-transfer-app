@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from scipy.integrate import solve_ivp
 
 # Constants
@@ -70,7 +71,9 @@ def simulate_transfer(x0, v0, t_max, dt, plot=True):
         "outcome": "complete",
         "nearest_approach_km": min_dist / 1e3,
         "closest_point_km": closest_point / 1e3,
-        "end_time_s": t_vals[-1]
+        "end_time_s": t_vals[-1],
+        "trajectory": trajectory,
+        "t_vals": t_vals
     }
 
 def _plot_sim(trajectory, t_vals, t_max, collided=None, closest_point=None):
@@ -98,44 +101,41 @@ def _plot_sim(trajectory, t_vals, t_max, collided=None, closest_point=None):
     plt.tight_layout()
     plt.show()
 
-
-import matplotlib.animation as animation
-
-def animate_trajectory(trajectory, t_vals):
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.set_xlim(np.min(trajectory[:,0]) / 1e3 - 5000, np.max(trajectory[:,0]) / 1e3 + 5000)
-    ax.set_ylim(np.min(trajectory[:,1]) / 1e3 - 5000, np.max(trajectory[:,1]) / 1e3 + 5000)
+def animate_trajectory(trajectory, t_vals, filename="animation.gif"):
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.set_xlim(np.min(trajectory[:,0])/1e3 - 5000, np.max(trajectory[:,0])/1e3 + 5000)
+    ax.set_ylim(np.min(trajectory[:,1])/1e3 - 5000, np.max(trajectory[:,1])/1e3 + 5000)
     ax.set_xlabel("X (km)")
     ax.set_ylabel("Y (km)")
-    ax.set_title("Live Earth-Moon Transfer Simulation")
+    ax.set_title("Earth-Moon Transfer")
     ax.grid()
-    
-    sc_line, = ax.plot([], [], 'b-', label='Spacecraft Trajectory')
-    sc_dot, = ax.plot([], [], 'bo', markersize=4)
-    earth_dot, = ax.plot([], [], 'go', label='Earth')
-    moon_dot, = ax.plot([], [], 'ko', label='Moon')
 
-    ax.legend()
+    sc_line, = ax.plot([], [], 'b-')
+    sc_dot, = ax.plot([], [], 'bo')
+    earth_dot, = ax.plot([], [], 'go')
+    moon_dot, = ax.plot([], [], 'ko')
 
     def init():
-        sc_line.set_data([], [])
-        sc_dot.set_data([], [])
-        earth_dot.set_data([], [])
-        moon_dot.set_data([], [])
         return sc_line, sc_dot, earth_dot, moon_dot
 
     def update(frame):
+        frame = min(frame, len(t_vals) - 1)  # Prevent out-of-range index
+
         x = trajectory[:frame+1, 0] / 1e3
         y = trajectory[:frame+1, 1] / 1e3
         sc_line.set_data(x, y)
         sc_dot.set_data(x[-1], y[-1])
+
         earth = earth_position(t_vals[frame]) / 1e3
         moon = moon_position(t_vals[frame]) / 1e3
         earth_dot.set_data(*earth)
         moon_dot.set_data(*moon)
+
         return sc_line, sc_dot, earth_dot, moon_dot
 
-    ani = animation.FuncAnimation(fig, update, frames=len(t_vals),
-                                  init_func=init, blit=True, interval=20)
-    plt.show()
 
+    print(f"Animating {len(t_vals)} frames")
+    ani = animation.FuncAnimation(fig, update, frames=len(t_vals),
+                                  init_func=init, blit=True, interval=30)
+    ani.save(str(filename), writer='pillow')  # Save as GIF instead of MP4
+    plt.close()

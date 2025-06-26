@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from simulate_earth_moon_transfer import simulate_transfer
+from simulate_earth_moon_transfer import simulate_transfer, animate_trajectory  
 
 st.set_page_config(layout="wide")
 st.title("🌕 Earth-to-Moon Transfer Simulator")
@@ -18,15 +18,31 @@ dt_sec = st.sidebar.selectbox("Time Step (seconds)", [10, 50, 100, 250, 500], in
 animate = st.sidebar.checkbox("Live Animation", value=False)
 run = st.sidebar.button("🚀 Run Simulation")
 
+result = None
+
 if run:
     x0 = np.array([x0_km * 1e3, y0_km * 1e3])
     v0 = np.array([vx0_kms * 1e3, vy0_kms * 1e3])
     st.write("Simulating...")
 
-    result = simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=animate)
+    result = simulate_transfer(x0, v0, t_max=sim_time_days * 24 * 3600, dt=dt_sec, plot=False)
+    if result is not None:        
+        if result["outcome"] == "collision":
+            st.error(f"☄️ Collision with {result['body']} at t = {result['time']:.1f} seconds.")
+        else:
+            st.success(f"✅ No collision. Nearest approach to Moon: {result['nearest_approach_km']:.1f} km")
+            st.write(f"Closest point (km): {result['closest_point_km']}")
 
-    if result["outcome"] == "collision":
-        st.error(f"☄️ Collision with {result['body']} at t = {result['time']:.1f} seconds.")
+        # Generate and display animation if requested
+        if animate:
+            filename = "animation.gif"
+
+            # Create animation and save as GIF
+            animate_trajectory(result["trajectory"], result["t_vals"], filename=filename)
+
+            # Load and display in Streamlit
+            with open(filename, "rb") as f:
+                st.image(f.read(), caption="Trajectory Animation")
+
     else:
-        st.success(f"✅ No collision. Nearest approach to Moon: {result['nearest_approach_km']:.1f} km")
-        st.write(f"Closest point (km): {result['closest_point_km']}")
+        st.error("❌ Simulation failed. Please check your inputs.")
