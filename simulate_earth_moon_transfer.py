@@ -129,5 +129,5 @@ def animate_trajectory(trajectory, t_vals, filename="animation.gif"):
 
     ani = animation.FuncAnimation(fig, update, frames=len(t_vals),
                                   init_func=init, blit=True, interval=30)
-    ani.save(filename, writer='pillow')  # Save as GIF instead of MP4
+    ani.save(str(filename), writer='pillow')  # Save as GIF instead of MP4
     plt.close()
