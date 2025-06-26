@@ -101,11 +101,10 @@ def _plot_sim(trajectory, t_vals, t_max, collided=None, closest_point=None):
     plt.tight_layout()
     plt.show()
 
-
-def animate_trajectory(trajectory, t_vals, filename="animation.mp4"):
+def animate_trajectory(trajectory, t_vals, filename="animation.gif"):
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.set_xlim(np.min(trajectory[:,0]) / 1e3 - 5000, np.max(trajectory[:,0]) / 1e3 + 5000)
-    ax.set_ylim(np.min(trajectory[:,1]) / 1e3 - 5000, np.max(trajectory[:,1]) / 1e3 + 5000)
+    ax.set_xlim(np.min(trajectory[:,0])/1e3 - 5000, np.max(trajectory[:,0])/1e3 + 5000)
+    ax.set_ylim(np.min(trajectory[:,1])/1e3 - 5000, np.max(trajectory[:,1])/1e3 + 5000)
     ax.set_xlabel("X (km)")
     ax.set_ylabel("Y (km)")
     ax.set_title("Earth-Moon Transfer")
@@ -120,15 +119,15 @@ def animate_trajectory(trajectory, t_vals, filename="animation.mp4"):
         return sc_line, sc_dot, earth_dot, moon_dot
 
     def update(frame):
-        sc_line.set_data(trajectory[:frame+1, 0] / 1e3, trajectory[:frame+1, 1] / 1e3)
-        sc_dot.set_data(trajectory[frame, 0] / 1e3, trajectory[frame, 1] / 1e3)
-        earth_pos = earth_position(t_vals[frame]) / 1e3
-        moon_pos = moon_position(t_vals[frame]) / 1e3
-        earth_dot.set_data(*earth_pos)
-        moon_dot.set_data(*moon_pos)
+        sc_line.set_data(trajectory[:frame+1, 0]/1e3, trajectory[:frame+1, 1]/1e3)
+        sc_dot.set_data(trajectory[frame, 0]/1e3, trajectory[frame, 1]/1e3)
+        earth = earth_position(t_vals[frame]) / 1e3
+        moon = moon_position(t_vals[frame]) / 1e3
+        earth_dot.set_data(*earth)
+        moon_dot.set_data(*moon)
         return sc_line, sc_dot, earth_dot, moon_dot
 
-    ani = animation.FuncAnimation(fig, update, frames=len(t_vals), init_func=init, blit=True)
-
-    ani.save(str(filename), writer='ffmpeg', fps=30)
+    ani = animation.FuncAnimation(fig, update, frames=len(t_vals),
+                                  init_func=init, blit=True, interval=30)
+    ani.save(filename, writer='pillow')  # Save as GIF instead of MP4
     plt.close()
