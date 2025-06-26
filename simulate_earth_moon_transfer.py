@@ -130,5 +130,5 @@ def animate_trajectory(trajectory, t_vals, filename="animation.mp4"):
 
     ani = animation.FuncAnimation(fig, update, frames=len(t_vals), init_func=init, blit=True)
 
-    ani.save(filename, writer='ffmpeg', fps=30)
+    ani.save(str(filename), writer='ffmpeg', fps=30)
     plt.close()
